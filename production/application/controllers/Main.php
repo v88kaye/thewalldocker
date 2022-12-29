@@ -12,7 +12,6 @@ class Main extends CI_Controller {
 		if($this->session->userdata('user_data')){
 			$this->load->model('Posts_model');
 			$this->view_data['user'] = json_decode($this->session->userdata('user_data'), TRUE);
-			$this->view_data['messages'] = $this->Posts_model->fetch_all_messages();
 
 			$this->load->view('dashboard', $this->view_data);
 		}
@@ -60,68 +59,5 @@ class Main extends CI_Controller {
 	public function logout() {
 		$this->session->unset_userdata('user_data');
 		redirect(base_url('/login'));
-	}
-
-	/* Save user's message in the database */
-	public function post_message() {
-		$loggedin_user = json_decode($this->session->userdata('user_data'), TRUE);
-		
-		if($this->input->post() && $loggedin_user['user_id']){
-			$message_data = array(
-				'user_id' => $loggedin_user['user_id'],
-				'message' => htmlspecialchars($this->input->post('message'))
-			);
-
-			$this->load->model('Posts_model');
-			$message = $this->Posts_model->post_message($message_data);
-			echo json_encode($message);
-		}
-		else
-			show_404('page', TRUE);
-	}
-
-	/* Save user's comment to a message in the database */
-	public function post_comment() {
-		$loggedin_user = json_decode($this->session->userdata('user_data'), TRUE);
-		
-		if($this->input->post() && $loggedin_user['user_id']){
-			$comment_data = array(
-				'user_id' => $loggedin_user['user_id'],
-				'message_id' => $this->input->post('message_id'),
-				'comment' => htmlspecialchars($this->input->post('comment'))
-			);
-
-			$this->load->model('Posts_model');
-			$comment = $this->Posts_model->post_comment($comment_data);
-			echo json_encode($comment);
-		}
-		else
-			show_404('page', TRUE);
-	}
-
-	public function delete_message() {
-		$loggedin_user = json_decode($this->session->userdata('user_data'), TRUE);
-		$message_id = $this->input->post('message_comment_id');
-		
-		if($loggedin_user['user_id'] && ($message_id != NULL && $message_id != '')){
-			$this->load->model('Posts_model');
-			$message_deleted = $this->Posts_model->delete_message($message_id, $loggedin_user['user_id']);
-			echo json_encode($message_deleted);
-		}
-		else
-			show_404('page', TRUE);
-	}
-
-	public function delete_comment() {
-		$loggedin_user = json_decode($this->session->userdata('user_data'), TRUE);
-		$comment_id = $this->input->post('message_comment_id');
-		
-		if($loggedin_user['user_id'] && ($comment_id != NULL && $comment_id != '')){
-			$this->load->model('Posts_model');
-			$message_deleted = $this->Posts_model->delete_comment($comment_id, $loggedin_user['user_id']);
-			echo json_encode($message_deleted);
-		}
-		else
-			show_404('page', TRUE);
 	}
 }
